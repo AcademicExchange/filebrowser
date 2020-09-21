@@ -11,8 +11,8 @@ async function reloadAction(method, content) {
         opts.body = content
     }
     let url = `/api/reload?uuid=${store.state.uuid}`
-    // reset uuid before reload
-    store.commit('setUUID', '')
     const res = await fetchURL(url, opts)
+    // reset uuid after reload
+    store.commit('setUUID', '')
     return res
 }
