@@ -33,7 +33,8 @@ var reloadHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *dat
     // cache.Dump()
     found, vals := cache.Get(uuid)
     if !found {
-        cache.Clear()
+        w.WriteHeader(http.StatusForbidden)
+        w.Write([]byte("Someone is currently hot reloading, please try again later!\n"))
         mtx.Unlock()
         return http.StatusForbidden, nil
     }

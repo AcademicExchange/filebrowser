@@ -5,6 +5,7 @@ import (
     "sync"
     "time"
 
+    libErrors "github.com/filebrowser/filebrowser/v2/errors"
     mapset "github.com/deckarep/golang-set"
 )
 
@@ -243,19 +244,19 @@ func (e *ExpiredMap) GetBakDir(key string, dir string) string {
     return cd.bakdir
 }
 
-func (e *ExpiredMap) AddConfig(key string, dir string, cfg string, t ConfigType) bool {
+func (e *ExpiredMap) AddConfig(key string, dir string, cfg string, t ConfigType) error {
     if key == "" || dir == "" || cfg == "" {
-        return false
+        return libErrors.ErrCacheFailed 
     }
     e.mtx.Lock()
     defer e.mtx.Unlock()
     value, found := e.m[key]
     if !found {
-        return false
+        return libErrors.ErrCacheFailed 
     }
     cd, found := value.data[dir]
     if !found {
-        return false
+        return libErrors.ErrCacheFailed 
     }
     switch t {
     case ConfigDB:
@@ -265,24 +266,24 @@ func (e *ExpiredMap) AddConfig(key string, dir string, cfg string, t ConfigType)
     case ConfigSVR:
         cd.svrs.Add(cfg)
     default:
-        return false
+        return libErrors.ErrCacheFailed 
     }
-    return true
+    return nil 
 }
 
-func (e *ExpiredMap) RemoveConfig(key string, dir string, cfg string, t ConfigType) {
+func (e *ExpiredMap) RemoveConfig(key string, dir string, cfg string, t ConfigType) error {
     if key == "" || dir == "" || cfg == "" {
-        return
+        return libErrors.ErrCacheFailed 
     }
     e.mtx.Lock()
     defer e.mtx.Unlock()
     value, found := e.m[key]
     if !found {
-        return
+        return libErrors.ErrCacheFailed 
     }
     cd, found := value.data[dir]
     if !found {
-        return
+        return libErrors.ErrCacheFailed 
     }
     switch t {
     case ConfigDB:
@@ -298,8 +299,9 @@ func (e *ExpiredMap) RemoveConfig(key string, dir string, cfg string, t ConfigTy
             cd.svrs.Remove(cfg)
         }
     default:
-        return
+        return libErrors.ErrCacheFailed 
     }
+    return nil
 }
 
 // Not locked, only for internal use

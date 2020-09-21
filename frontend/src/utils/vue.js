@@ -11,7 +11,7 @@ Vue.config.productionTip = true
 const notyDefault = {
   type: 'info',
   layout: 'bottomRight',
-  timeout: 1000,
+  timeout: 3000,
   progressBar: true
 }
 
@@ -42,7 +42,7 @@ Vue.prototype.$showError = (error) => {
   let n = new Noty(Object.assign({}, notyDefault, {
     text: error.message || error,
     type: 'error',
-    timeout: null,
+    timeout: 3000,
     buttons: btns
   }))
 

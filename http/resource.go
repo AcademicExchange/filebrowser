@@ -142,8 +142,16 @@ var resourcePostPutHandler = withUser(func(w http.ResponseWriter, r *http.Reques
     if uuid == "" {
         w.WriteHeader(http.StatusForbidden)
         w.Write([]byte("Operation is prohibited without uuid\n"))
-        return http.StatusForbidden, nil
+        return errToStatus(libErrors.ErrPermissionDenied), libErrors.ErrPermissionDenied
     }
+
+    dir := r.URL.Query().Get("dir")
+    if dir == "" {
+        w.WriteHeader(http.StatusForbidden)
+        w.Write([]byte("Operation is prohibited without upload directory\n"))
+        return errToStatus(libErrors.ErrPermissionDenied), libErrors.ErrPermissionDenied
+    }
+    absDir := filepath.Join(d.user.Scope, dir)
 
     mtx.Lock()
     if cache.Size() == 0 {
@@ -151,9 +159,19 @@ var resourcePostPutHandler = withUser(func(w http.ResponseWriter, r *http.Reques
         // upload all files within one hour
         // only one key will be successfully set
         if ok := cache.Set(uuid, vals, duration); !ok {
+            w.WriteHeader(http.StatusForbidden)
+            w.Write([]byte("Cache uuid failed, please try again later!\n"))
             mtx.Unlock()
-            return http.StatusForbidden, nil
+            return errToStatus(libErrors.ErrPermissionDenied), libErrors.ErrPermissionDenied
         }
+    }
+
+    // not allowed if uuid not exists
+    if found := cache.IsKeyExisted(uuid); !found {
+        w.WriteHeader(http.StatusForbidden)
+        w.Write([]byte("Someone is currently hot reloading, please try again later!\n"))
+        mtx.Unlock()
+        return errToStatus(libErrors.ErrPermissionDenied), libErrors.ErrPermissionDenied
     }
     mtx.Unlock()
 
@@ -191,11 +209,6 @@ var resourcePostPutHandler = withUser(func(w http.ResponseWriter, r *http.Reques
     }
 
     err := d.RunHook(func() error {
-        dir := r.URL.Query().Get("dir")
-        if dir == "" {
-            return libErrors.ErrPermissionDenied
-        }
-
         name := strings.ReplaceAll(r.URL.Path, dir, "")
         name = strings.TrimLeft(name, "/")
 
@@ -204,15 +217,7 @@ var resourcePostPutHandler = withUser(func(w http.ResponseWriter, r *http.Reques
             return err
         }
 
-        // now allowed if uuid not exists
         mtx.Lock()
-        if found := cache.IsKeyExisted(uuid); !found {
-            w.WriteHeader(http.StatusForbidden)
-            w.Write([]byte("Someone is currently hotbrushing, please try again later!\n"))
-            mtx.Unlock()
-            return libErrors.ErrPermissionDenied
-        }
-        absDir := filepath.Join(d.user.Scope, dir)
         if found := cache.IsDirCacheExisted(uuid, absDir); !found {
             cache.SetCacheData(uuid, absDir, newCacheData())
         }
@@ -266,6 +271,12 @@ var resourcePostPutHandler = withUser(func(w http.ResponseWriter, r *http.Reques
         etag := fmt.Sprintf(`"%x%x"`, info.ModTime().UnixNano(), info.Size())
         w.Header().Set("ETag", etag)
 
+        return nil
+    }, action, r.URL.Path, "", d.user)
+
+    if err != nil {
+        _ = d.user.Fs.RemoveAll(r.URL.Path)
+    } else { // cache without error
         // Note(youngerli): Except for the ClientConfig and ServerConfig,
         // other files or directories are not regarded as configuration so they will not cached
         // reload strategy: ServerConfig is fully reloaded,
@@ -275,19 +286,14 @@ var resourcePostPutHandler = withUser(func(w http.ResponseWriter, r *http.Reques
         mtx.Lock()
         if strings.Contains(dir, "ClientConfig") {
             if strings.HasSuffix(full, ".xml") {
-                cache.AddConfig(uuid, absDir, full, ConfigXML)
+                err = cache.AddConfig(uuid, absDir, full, ConfigXML)
             } else if strings.HasSuffix(full, ".db") {
-                cache.AddConfig(uuid, absDir, full, ConfigDB)
+                err = cache.AddConfig(uuid, absDir, full, ConfigDB)
             }
         } else if strings.Contains(dir, "ServerConfig") {
-            cache.AddConfig(uuid, absDir, full, ConfigSVR)
+            err = cache.AddConfig(uuid, absDir, full, ConfigSVR)
         }
         mtx.Unlock()
-        return nil
-    }, action, r.URL.Path, "", d.user)
-
-    if err != nil {
-        _ = d.user.Fs.RemoveAll(r.URL.Path)
     }
 
     return errToStatus(err), err
