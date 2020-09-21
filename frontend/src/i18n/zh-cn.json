@@ -32,6 +32,7 @@
     "toggleSidebar": "切换侧边栏",
     "update": "更新",
     "upload": "上传",
+    "reload": "重新加载配置",
     "permalink": "获取永久链接"
   },
   "success": {

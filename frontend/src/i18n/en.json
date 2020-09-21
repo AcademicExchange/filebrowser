@@ -32,6 +32,7 @@
     "toggleSidebar": "Toggle sidebar",
     "update": "Update",
     "upload": "Upload",
+    "reload": "Reload",
     "permalink": "Get Permanent Link"
   },
   "success": {
@@ -118,7 +119,9 @@
     "scheduleMessage": "Pick a date and time to schedule the publication of this post.",
     "newArchetype": "Create a new post based on an archetype. Your file will be created on content folder.",
     "upload": "Upload",
-    "uploadMessage": "Select an option to upload."
+    "uploadMessage": "Select an option to upload.",
+    "reload": "Reload",
+    "reloadMessage": "Are you sure to reload config?"
   },
   "settings": {
     "themes": {

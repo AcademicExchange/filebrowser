@@ -7,25 +7,31 @@ require (
 	github.com/asdine/storm v2.1.2+incompatible
 	github.com/caddyserver/caddy v1.0.3
 	github.com/daaku/go.zipexe v1.0.1 // indirect
+	github.com/deckarep/golang-set v1.7.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/disintegration/imaging v1.6.2
 	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/go-session/session v2.4.0+incompatible // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.1
+	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/maruel/natural v0.0.0-20180416170133-dbcb3e2e8cf1
 	github.com/marusama/semaphore/v2 v2.4.1
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nwaples/rardecode v1.0.0 // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pelletier/go-toml v1.6.0
 	github.com/pierrec/lz4 v0.0.0-20190131084431-473cd7ce01a1 // indirect
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/spf13/afero v1.2.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.6.1
 	github.com/stretchr/testify v1.6.1
+	github.com/tidwall/buntdb v1.1.2 // indirect
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect

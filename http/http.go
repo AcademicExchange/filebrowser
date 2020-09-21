@@ -64,6 +64,8 @@ func NewHandler(imgSvc ImgService, fileCache FileCache, store *storage.Storage, 
 	api.PathPrefix("/command").Handler(monkey(commandsHandler, "/api/command")).Methods("GET")
 	api.PathPrefix("/search").Handler(monkey(searchHandler, "/api/search")).Methods("GET")
 
+	api.PathPrefix("/reload").Handler(monkey(reloadHandler, "/api/reload")).Methods("GET")
+
 	public := api.PathPrefix("/public").Subrouter()
 	public.PathPrefix("/dl").Handler(monkey(publicDlHandler, "/api/public/dl/")).Methods("GET")
 	public.PathPrefix("/share").Handler(monkey(publicShareHandler, "/api/public/share/")).Methods("GET")

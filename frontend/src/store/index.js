@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import mutations from './mutations'
 import getters from './getters'
 import upload from './modules/upload'
+import reloads from './modules/reload'
 
 Vue.use(Vuex)
 
@@ -15,6 +16,7 @@ const state = {
     items: []
   },
   jwt: '',
+  uuid: '',
   progress: 0,
   loading: false,
   reload: false,
@@ -32,5 +34,5 @@ export default new Vuex.Store({
   state,
   getters,
   mutations,
-  modules: { upload }
+  modules: { upload, reloads }
 })

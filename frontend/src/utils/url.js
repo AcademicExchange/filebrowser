@@ -24,8 +24,16 @@ function encodePath(str) {
   return str.split('/').map(v => encodeURIComponent(v)).join('/')
 }
 
+function unicodeToChar(text) {
+  return text.replace(/\\u[\dA-F]{4}/gi, 
+         function (match) {
+              return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
+         });
+}
+
 export default {
   encodeRFC5987ValueChars: encodeRFC5987ValueChars,
   removeLastDir: removeLastDir,
-  encodePath: encodePath
+  encodePath: encodePath,
+  unicodeToChar: unicodeToChar
 }

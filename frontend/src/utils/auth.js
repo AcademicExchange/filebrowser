@@ -82,6 +82,7 @@ export async function signup (username, password) {
 
 export function logout () {
   store.commit('setJWT', '')
+  store.commit('setUUID', '')
   store.commit('setUser', null)
   localStorage.setItem('jwt', null)
   router.push({path: '/login'})
