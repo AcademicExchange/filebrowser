@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
     "bufio"
     "io"
     "log"
@@ -30,7 +31,7 @@ var reloadHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *dat
     xmlFile := filepath.Join(d.user.Scope, "wedo/ClientConfig/CSCommon/DB/SvrLoadList.xml")
     cfgs := parseSvrloadXML(xmlFile)
     mtx.Lock()
-    // cache.Dump()
+    // fmt.Println(cache)
     found, vals := cache.Get(uuid)
     if !found {
         w.WriteHeader(http.StatusForbidden)
@@ -70,7 +71,7 @@ var reloadHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *dat
     }
 
     err, out := execReload(d, str)
-    // Command executed, safely clear the cache and unlock, and notify next uuid request to continue
+    // Command executed, safely clear the cache and unlock
     cache.Clear()
     mtx.Unlock()
 
