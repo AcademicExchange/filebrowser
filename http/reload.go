@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
     "bufio"
     "io"
     "log"
@@ -31,7 +30,7 @@ var reloadHandler = withUser(func(w http.ResponseWriter, r *http.Request, d *dat
     xmlFile := filepath.Join(d.user.Scope, "wedo/ClientConfig/CSCommon/DB/SvrLoadList.xml")
     cfgs := parseSvrloadXML(xmlFile)
     mtx.Lock()
-    // fmt.Println(cache)
+    // log.Println(cache)
     found, vals := cache.Get(uuid)
     if !found {
         w.WriteHeader(http.StatusForbidden)
