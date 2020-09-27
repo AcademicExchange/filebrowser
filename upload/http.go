@@ -28,7 +28,7 @@ func UnescapeUnicode(raw []byte) ([]byte, error) {
 }
 
 func login(username string, password string) (int, string) {
-    b, err := json.Marshal(LoginField{"wedo", "wedo", ""})
+    b, err := json.Marshal(LoginField{Username: username, Password: password, Recaptcha: ""})
     if err != nil {
         log.Errorf("json encode failed")
         return http.StatusBadRequest, ""
