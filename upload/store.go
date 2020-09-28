@@ -8,18 +8,23 @@ import (
 )
 
 type Store struct {
-    data record
+    data map[string]map[string]*meta
     mu   sync.RWMutex
     file *os.File
 }
 
-type record struct {
-    UUID string
+type meta struct {
+    Url  string
+    Uuid string
     Jwt  string
 }
 
+type record struct {
+    M map[string]map[string]*meta
+}
+
 func NewStore(filename string) *Store {
-    s := &Store{data: record{}}
+    s := &Store{data: make(map[string]map[string]*meta)}
     f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
     if err != nil {
         log.Fatalf("open store failed:", err)
@@ -32,28 +37,52 @@ func NewStore(filename string) *Store {
     return s
 }
 
-func (s *Store) GetUUID() string {
+func (s *Store) GetUuid(env, url string) string {
     s.mu.RLock()
     defer s.mu.RUnlock()
-    return s.data.UUID
+    if _, found := s.data[env]; !found {
+        s.data[env] = make(map[string]*meta)
+    }
+    if _, found := s.data[env][url]; !found {
+        s.data[env][url] = &meta{}
+    }
+    return s.data[env][url].Uuid
 }
 
-func (s *Store) SetUUID(uuid string) {
+func (s *Store) SetUuid(env, url, uuid string) {
     s.mu.Lock()
     defer s.mu.Unlock()
-    s.data.UUID = uuid
+    if _, found := s.data[env]; !found {
+        s.data[env] = make(map[string]*meta)
+    }
+    if _, found := s.data[env][url]; !found {
+        s.data[env][url] = &meta{}
+    }
+    s.data[env][url].Uuid = uuid
 }
 
-func (s *Store) GetJWT() string {
+func (s *Store) GetJwt(env, url string) string {
     s.mu.RLock()
     defer s.mu.RUnlock()
-    return s.data.Jwt
+    if _, found := s.data[env]; !found {
+        s.data[env] = make(map[string]*meta)
+    }
+    if _, found := s.data[env][url]; !found {
+        s.data[env][url] = &meta{}
+    }
+    return s.data[env][url].Jwt
 }
 
-func (s *Store) SetJWT(jwt string) {
+func (s *Store) SetJwt(env, url, jwt string) {
     s.mu.Lock()
     defer s.mu.Unlock()
-    s.data.Jwt = jwt
+    if _, found := s.data[env]; !found {
+        s.data[env] = make(map[string]*meta)
+    }
+    if _, found := s.data[env][url]; !found {
+        s.data[env][url] = &meta{}
+    }
+    s.data[env][url].Jwt = jwt
 }
 
 func (s *Store) load() error {
@@ -61,16 +90,13 @@ func (s *Store) load() error {
         return err
     }
     d := gob.NewDecoder(s.file)
-    var err error
-    var r record
-    if err = d.Decode(&r); err == nil {
-        s.data.UUID = r.UUID
-        s.data.Jwt = r.Jwt
+    if err := d.Decode(&s.data); err != nil {
+        if err == io.EOF {
+            return nil
+        }
+        return err
     }
-    if err == io.EOF {
-        return nil
-    }
-    return err
+    return nil
 }
 
 func (s *Store) Save() error {

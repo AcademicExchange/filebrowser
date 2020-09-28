@@ -13,7 +13,7 @@ import (
     "strings"
 )
 
-type LoginField struct {
+type LoginFields struct {
     Username  string `json:"username"`
     Password  string `json:"password"`
     Recaptcha string `json:"recaptcha"`
@@ -27,13 +27,14 @@ func UnescapeUnicode(raw []byte) ([]byte, error) {
     return []byte(str), nil
 }
 
-func login(username string, password string) (int, string) {
-    b, err := json.Marshal(LoginField{Username: username, Password: password, Recaptcha: ""})
+func (s *Socket) login() (int, string) {
+    b, err := json.Marshal(LoginFields{Username: s.Username, Password: s.Password, Recaptcha: ""})
     if err != nil {
         log.Errorf("json encode failed")
         return http.StatusBadRequest, ""
     }
-    url := host + "/api/login"
+    url := s.GetUrl() 
+    url += "/api/login"
     resp, err := http.Post(url, "application/json", bytes.NewBuffer(b))
     if err != nil {
         log.Errorf("http request post: %v", err)
@@ -51,8 +52,9 @@ func login(username string, password string) (int, string) {
     return resp.StatusCode, string(respBody)
 }
 
-func renew(jwt string) (int, string) {
-    url := host + "/api/renew"
+func (s *Socket) renew(jwt string) (int, string) {
+    url := s.GetUrl()
+    url += "/api/renew"
     req, err := http.NewRequest("POST", url, &bytes.Buffer{})
     if err != nil {
         log.Errorf("http new request failed: %v", err)
@@ -77,17 +79,21 @@ func renew(jwt string) (int, string) {
     return resp.StatusCode, string(respBody)
 }
 
-func upload(path string, dir string, uuid string, jwt string) (int, string) {
-    url := host + "/api/resources/wedo/"
+func (s *Socket) upload(path, dir, uuid, jwt string) (int, string) {
+    url := s.GetUrl()
+    url += "/api/resources/wedo/"
+    query := fmt.Sprintf("?override=%s&dir=%s&uuid=%s", "true", dir, uuid)
     if strings.Contains(path, "ClientConfig") {
         idx := strings.Index(path, "ClientConfig")
         relative := path[idx:]
-        query := fmt.Sprintf("?override=%s&dir=%s&uuid=%s", "true", dir, uuid)
+        url += relative + query
+    } else if strings.Contains(path, "Common") {
+        idx := strings.Index(path, "DB")
+        relative := "ClientConfig/CSCommon/" + path[idx:]
         url += relative + query
     } else if strings.Contains(path, "ServerConfig") {
         idx := strings.Index(path, "ServerConfig")
         relative := path[idx:]
-        query := fmt.Sprintf("?override=%s&dir=%s&uuid=%s", "true", dir, uuid)
         url += relative + query
     }
 
@@ -141,8 +147,9 @@ func upload(path string, dir string, uuid string, jwt string) (int, string) {
     return resp.StatusCode, string(respBody)
 }
 
-func reloadConfig(uuid string, jwt string) (int, string) {
-    url := host + "/api/reload?uuid=" + uuid
+func (s *Socket) reload(uuid, jwt string) (int, string) {
+    url := s.GetUrl()
+    url += "/api/reload?uuid=" + uuid
 
     reqest, err := http.NewRequest("GET", url, nil)
     if err != nil {

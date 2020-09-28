@@ -1,0 +1,19 @@
+{
+    "myenv": {
+        "desc": "my stupid environment",
+        "tcm": {
+            "ip": "localhost",
+            "port": 8081,
+            "username": "user",
+            "password": "123"
+        },
+        "nodes": [
+            {
+                "ip": "localhost",
+                "port": 8081,
+                "username": "user",
+                "password": "123"
+            }
+        ]
+    }
+}
