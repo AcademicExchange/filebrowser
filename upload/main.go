@@ -64,13 +64,13 @@ func isLoginCompleted(env string, st *Store, so *Socket) bool {
 			st.SetJwt(env, so.GetUrl(), jwt)
 		}
 	}
-	log.Debugf("jwt: %s", jwt)
+	// log.Debugf("jwt: %s", jwt)
 
 	if uid = st.GetUuid(env, so.GetUrl()); uid == "" {
 		uid = uuid.NewV4().String()
 		st.SetUuid(env, so.GetUrl(), uid)
 	}
-	log.Debugf("uuid: %s", uid)
+	// log.Debugf("uuid: %s", uid)
 	return true
 }
 
